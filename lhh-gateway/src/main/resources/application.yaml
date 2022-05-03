@@ -1,0 +1,45 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: gateway
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+#      config:
+#        server-addr: 127.0.0.1:8848
+#        name: gateway.properties
+#        refresh-enabled: true
+#        file-extension: properties
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lower-case-service-id: true
+      httpclient:
+        response-timeout: 10s
+        connect-timeout: 5000
+      routes:
+        - id: self-help-router
+          uri: lb://self-help
+          predicates:
+            - Path=/self-help/**
+          filters:
+            - StripPrefix=1
+        - id: auth-manage-router
+          uri: lb://auth-manage
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+      filter:
+        retry:
+          enabled: false
+logging:
+  level:
+    org.springframework.cloud.gateway: trace
+    org.springframework.cloud.loadbalancer: trace
+    org.springframework.web.reactive: trace
